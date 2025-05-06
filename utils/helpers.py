@@ -1,22 +1,31 @@
+# utils/helpers.py
+
 from telegram import Update
-from telegram.constants import ChatMemberStatus
+from telegram.ext import ContextTypes
+from telegram.error import TelegramError
 
-async def is_user_admin(update: Update) -> bool:
-    user_id = update.effective_user.id
+import logging
+logger = logging.getLogger(__name__)
+
+async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    """Returns True if the user is an admin in the current group."""
     chat = update.effective_chat
+    user = update.effective_user
 
-    # Fetch list of chat administrators
-    chat_admins = await chat.get_administrators()
-    admin_ids = [admin.user.id for admin in chat_admins]
-
-    return user_id in admin_ids
-
-async def require_admin(update: Update, context, command_name: str = "") -> bool:
-    if not await is_user_admin(update):
-        await update.message.reply_text(
-            f"😼 Oops! You need to be an *admin* to use `{command_name}`.\n"
-            "Nice try though. I'll make sure the real admins hear about this... maybe. 😼",
-            parse_mode="Markdown"
-        )
+    # Only works in group/supergroup
+    if chat.type not in ["group", "supergroup"]:
+        await update.message.reply_text("⚠️ This command can only be used in group chats.")
         return False
-    return True
+
+    try:
+        member = await context.bot.get_chat_member(chat.id, user.id)
+        if member.status in ["administrator", "creator"]:
+            return True
+
+        await update.message.reply_text("🚫 Only admins can use this command!")
+        return False
+
+    except TelegramError as e:
+        logger.error(f"Admin check error: {e}")
+        await update.message.reply_text("❌ Couldn't verify admin status. Try again later.")
+        return False

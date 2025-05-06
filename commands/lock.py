@@ -1,10 +1,7 @@
-# File: commands/lock.py
-
 from telegram import Update, ChatPermissions
-from telegram.ext import CommandHandler, ContextTypes
+from telegram.ext import ContextTypes
 from utils.helpers import is_user_admin
 
-# Night Mode (Lock)
 async def nightmode_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not await is_user_admin(update, context):
         return
@@ -13,9 +10,8 @@ async def nightmode_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     permissions = ChatPermissions(can_send_messages=False)
 
     await context.bot.set_chat_permissions(chat_id, permissions)
-    await update.message.reply_text("🌙 Night mode activated. Group is now locked!")
+    await update.message.reply_text("🌙 Night mode activated. Group locked!")
 
-# Morning Mode (Unlock)
 async def morningmode_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not await is_user_admin(update, context):
         return
@@ -31,9 +27,4 @@ async def morningmode_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
     await context.bot.set_chat_permissions(chat_id, permissions)
-    await update.message.reply_text("☀️ Morning mode activated. Group is now unlocked!")
-
-# Register handlers
-def register_lock_handler(app):
-    app.add_handler(CommandHandler("nightmode", nightmode_command))
-    app.add_handler(CommandHandler("morningmode", morningmode_command))
+    await update.message.reply_text("☀️ Morning mode activated. Group unlocked!")
