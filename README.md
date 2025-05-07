@@ -18,6 +18,7 @@ A robust and extensible Telegram bot framework with built-in admin features, gro
    ```
    TELEGRAM_BOT_TOKEN=your_bot_token_here
    ADMIN_USER_ID=your_telegram_id_here
+   CAT_API_KEY=your_catsite_api_key
    ```
 3. Install dependencies: `pip install -r requirements.txt`
 4. Run the bot: `python bot.py`
