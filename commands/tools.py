@@ -1,39 +1,38 @@
-# File: commands/lock.py
-
-from telegram import Update, ChatPermissions
+# File: commands/tools.py
+from telegram import Update
 from telegram.ext import CommandHandler, ContextTypes
-from utils.helpers import is_user_admin
+import datetime
 
-# Night Mode (Lock)
-async def nightmode_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if not await is_user_admin(update, context):
-        return
-
-    chat_id = update.effective_chat.id
-    permissions = ChatPermissions(can_send_messages=False)
-
-    await context.bot.set_chat_permissions(chat_id, permissions)
-    await update.message.reply_text("🌙 Night mode activated. Group is now locked!")
-
-# Morning Mode (Unlock)
-async def morningmode_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if not await is_user_admin(update, context):
-        return
-
-    chat_id = update.effective_chat.id
-    permissions = ChatPermissions(
-        can_send_messages=True,
-        can_send_media_messages=True,
-        can_send_polls=True,
-        can_send_other_messages=True,
-        can_add_web_page_previews=True,
-        can_invite_users=True
+async def id_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    chat = update.effective_chat
+    await update.message.reply_text(
+        f"🧾 Your ID: <code>{user.id}</code>\n"
+        f"🗣️ Chat ID: <code>{chat.id}</code>",
+        parse_mode="HTML"
     )
 
-    await context.bot.set_chat_permissions(chat_id, permissions)
-    await update.message.reply_text("☀️ Morning mode activated. Group is now unlocked!")
+async def time_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Return the current server time."""
+    now = datetime.datetime.now()
+    await update.message.reply_text(f"🕒 Current server time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
 
-# Register handlers
-def register_lock_handler(app):
-    app.add_handler(CommandHandler("nightmode", nightmode_command))
-    app.add_handler(CommandHandler("morningmode", morningmode_command))
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Provide help information."""
+    help_text = (
+        "Available commands:\n"
+        "/id - Get your user and chat ID\n"
+        "/echo - Echo your message\n"
+        "/help - Show this help message"
+    )
+    await update.message.reply_text(help_text)
+
+async def echo_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Echo the user's message."""
+    await update.message.reply_text(update.message.text)
+
+def register_tools_handler(app):
+    app.add_handler(CommandHandler("id", id_command))
+    app.add_handler(CommandHandler("echo", echo_command))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("time", time_command))  # Register time command
